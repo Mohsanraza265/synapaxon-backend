@@ -27,7 +27,8 @@ const corsOptions = {
     'http://localhost:3000',
     'http://localhost:5173',
     'http://localhost:8000',
-    'https://synapaxon-backend.onrender.com'
+    'https://synapaxon-backend.onrender.com',
+    'https://synapaxon-frontend-main.vercel.app'
   ],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
