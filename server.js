@@ -33,7 +33,9 @@ const corsOptions = {
   ],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true
+  credentials: true,
+  preflightContinue: false, // Importante para Vercel
+  optionsSuccessStatus: 204
 };
 
 app.use(cors(corsOptions));
