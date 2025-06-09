@@ -24,7 +24,7 @@ const validateMedia = (media, fieldName) => {
 // @access  Private
 exports.submitQuestionAnswer = async (req, res, next) => {
   try {
-    const { testSessionId, questionId, selectedAnswer, subjects, topics } = req.body;
+    const { testSessionId, questionId, selectedAnswer, subjects, topics,difficulty } = req.body;
 
     // Validate required fields
     if (!testSessionId || !questionId || selectedAnswer === undefined) {
@@ -115,7 +115,8 @@ exports.submitQuestionAnswer = async (req, res, next) => {
       category: question.category,
       subjects: subjects || [], // Use provided subjects, default to empty array
       topics: topics || [],     // Use provided topics, default to empty array
-      lastUpdatedAt: Date.now()
+      lastUpdatedAt: Date.now(),
+      difficulty:difficulty
     };
 
     if (!existingSubmission) {
@@ -303,6 +304,7 @@ exports.getQuestionHistory = async (req, res, next) => {
       const topicArray = Array.isArray(req.query.topics) ? req.query.topics : req.query.topics.split(',');
       filter.topics = { $in: topicArray };
     }
+    if (req.query.difficulty) filter.difficulty = req.query.difficulty;
     if (req.query.isCorrect === 'true') filter.isCorrect = true;
     if (req.query.isCorrect === 'false') {
       filter.isCorrect = false;
@@ -320,7 +322,7 @@ exports.getQuestionHistory = async (req, res, next) => {
         path: 'testSession',
         select: 'startedAt status'
       })
-      .select('options correctAnswer selectedAnswer isCorrect explanation explanationMedia category subjects topics answeredAt lastUpdatedAt')
+      .select('options correctAnswer selectedAnswer isCorrect explanation explanationMedia category subjects topics answeredAt lastUpdatedAt difficulty')
       .sort({ lastUpdatedAt: -1 });
 
     res.status(200).json({

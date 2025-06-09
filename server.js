@@ -14,7 +14,7 @@ const questionRoutes = require('./routes/questions');
 const testRoutes = require('./routes/tests');
 const uploadRoutes = require('./routes/uploads');
 const studentQuestionRoutes = require('./routes/studentQuestions');
-
+const apiAiRoutes = require('./routes/aiRoutes')
 const app = express();
 
 // Connect to database
@@ -49,7 +49,7 @@ app.use('/api/questions', questionRoutes);
 app.use('/api/tests', testRoutes);
 app.use('/api/uploads', uploadRoutes);
 app.use('/api/student-questions', studentQuestionRoutes);
-
+app.use('/api/ai',apiAiRoutes)
 app.use(errorHandler);
 
 const PORT = config.PORT || 9000;

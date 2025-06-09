@@ -47,6 +47,10 @@ const StudentQuestionSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
+  difficulty: {
+    type: String,
+    default: ""
+  },
   explanation: {
     type: String,
     required: true
