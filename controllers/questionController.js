@@ -407,28 +407,69 @@ exports.getQuestions = async (req, res, next) => {
   try {
     const query = { approved: true };
 
+    // 1. Filtro por categoría
     if (req.query.category) query.category = req.query.category;
 
-    if (req.query.subjects) {
+    // 2. Filtro por subjects (si no hay subjectTopics)
+    if (req.query.subjects && !req.query.subjectTopics) {
       const subjects = Array.isArray(req.query.subjects)
         ? req.query.subjects
         : req.query.subjects.split(',');
       query['subjects.name'] = { $in: subjects };
     }
 
-    if (req.query.topics) {
-      const topics = Array.isArray(req.query.topics)
-        ? req.query.topics
-        : req.query.topics.split(',');
-      query['subjects.topics'] = { $in: topics };
+    // 3. Filtro por subjectTopics (relación subject:topic)
+    if (req.query.subjectTopics) {
+      const subjectTopicsPairs = Array.isArray(req.query.subjectTopics)
+        ? req.query.subjectsTopics
+        : req.query.subjectTopics.split(',');
+
+      const subjectTopicsMap = subjectTopicsPairs.reduce((acc, pair) => {
+        const [subject, topic] = pair.split(':').map(decodeURIComponent);
+        if (!acc[subject]) acc[subject] = [];
+        acc[subject].push(topic);
+        return acc;
+      }, {});
+
+      // Condiciones para subjects CON topics específicos
+      const subjectWithTopicsConditions = Object.entries(subjectTopicsMap).map(([subject, topics]) => ({
+        subjects: {
+          $elemMatch: {
+            name: subject,
+            topics: { $in: topics }
+          }
+        }
+      }));
+
+      // Condiciones para subjects SIN topics (solo el subject)
+      const subjectsWithoutTopics = req.query.subjects
+        ? Array.isArray(req.query.subjects)
+          ? req.query.subjects
+          : req.query.subjects.split(',')
+        : [];
+      const subjectsToInclude = subjectsWithoutTopics.filter(subject => !subjectTopicsMap[subject]);
+      const subjectOnlyConditions = subjectsToInclude.map(subject => ({
+        subjects: {
+          $elemMatch: {
+            name: subject
+          }
+        }
+      }));
+
+      // Combina todas las condiciones con $or
+      query.$or = [...subjectWithTopicsConditions, ...subjectOnlyConditions];
+    } else if (req.query.subjects) {
+      // Filtro tradicional por subjects (si no hay subjectTopics)
+      const subjects = Array.isArray(req.query.subjects)
+        ? req.query.subjects
+        : req.query.subjects.split(',');
+      query['subjects.name'] = { $in: subjects };
     }
 
-    if (req.query.tags) {
-      const tags = req.query.tags.split(',');
-      query.tags = { $in: tags };
+    // 4. Filtros adicionales (difficulty, tags, etc.)
+    if (req.query.difficulty && req.query.difficulty !== 'all') {
+      query.difficulty = req.query.difficulty;
     }
-
-    if (req.query.difficulty) query.difficulty = req.query.difficulty;
 
     if (req.query.createdBy) {
       if (req.query.createdBy === 'me') {
@@ -519,7 +560,7 @@ exports.getTags = async (req, res, next) => {
 exports.getTotalQuestionsCount = async (req, res, next) => {
   try {
     const totalCount = await Question.countDocuments({ approved: true });
-    
+
     res.status(200).json({
       success: true,
       data: {
