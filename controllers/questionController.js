@@ -200,7 +200,7 @@ exports.updateQuestion = async (req, res, next) => {
 exports.deleteQuestion = async (req, res, next) => {
   try {
     const question = await Question.findById(req.params.id);
-    console.log(question)
+
     if (!question) {
       return res.status(404).json({
         success: false,
