@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 const mediaSchema = new mongoose.Schema({
   type: {
     type: String,
-    enum: ['image', 'video', 'raw', 'url'], // Add 'raw' for non-image/video files (e.g., PDF)
+    enum: ['image', 'video', 'raw', 'url','youtube'], // Add 'raw' for non-image/video files (e.g., PDF)
     required: true
   },
   path: {
@@ -34,6 +34,7 @@ const mapCloudinaryType = (resourceType) => {
   if (resourceType === 'image') return 'image';
   if (resourceType === 'video') return 'video';
   if (resourceType === 'raw') return 'raw';
+  if (resourceType === 'youtube') return 'youtube';
   return 'url';
 };
 
