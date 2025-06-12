@@ -5,6 +5,7 @@ const mapCloudinaryType = (resourceType) => {
   if (resourceType === 'image') return 'image';
   if (resourceType === 'video') return 'video';
   if (resourceType === 'raw') return 'raw';
+  if(resourceType === 'youtube') return 'youtube'
   return 'url';
 };
 
@@ -22,7 +23,7 @@ const validateMedia = (media, fieldName) => {
         throw new Error(`Each ${fieldName.toLowerCase()} object must include size (except for URLs)`);
       }
       // Ensure type is valid
-      if (!['image', 'video', 'raw', 'url'].includes(item.type)) {
+      if (!['image', 'video', 'raw', 'url','youtube'].includes(item.type)) {
         throw new Error(`Each ${fieldName.toLowerCase()} object must have a valid type: image, video, raw, or url`);
       }
     }
@@ -199,7 +200,7 @@ exports.updateQuestion = async (req, res, next) => {
 exports.deleteQuestion = async (req, res, next) => {
   try {
     const question = await Question.findById(req.params.id);
-
+    console.log(question)
     if (!question) {
       return res.status(404).json({
         success: false,

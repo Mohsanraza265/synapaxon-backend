@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 const mediaSchema = new mongoose.Schema({
   type: {
     type: String,
-    enum: ['image', 'video', 'raw', 'url','youtube'], // Add 'raw' for non-image/video files (e.g., PDF)
+    enum: ['image', 'video', 'raw', 'url', 'youtube'], // Add 'raw' for non-image/video files (e.g., PDF)
     required: true
   },
   path: {
@@ -25,7 +25,7 @@ const mediaSchema = new mongoose.Schema({
   },
   size: {
     type: Number,
-    required: function() { return this.mimetype !== 'text/url'; }
+    required: function () { return this.mimetype !== 'text/url'; }
   }
 });
 
@@ -59,7 +59,7 @@ const questionSchema = new mongoose.Schema({
     type: [optionSchema],
     required: true,
     validate: {
-      validator: function(arr) {
+      validator: function (arr) {
         return arr.length >= 2;
       },
       message: 'At least two options are required'
@@ -125,7 +125,7 @@ questionSchema.index({ category: 1 });
 questionSchema.index({ 'subjects.name': 1 });
 
 // Ensure correctAnswer is valid
-questionSchema.pre('validate', function(next) {
+questionSchema.pre('validate', function (next) {
   if (this.options && (this.correctAnswer < 0 || this.correctAnswer >= this.options.length)) {
     next(new Error('Correct answer index is out of range'));
   } else {
@@ -140,11 +140,11 @@ questionSchema.pre('validate', function(next) {
 // ... Existing imports and schemas ...
 
 // Delete associated media files from Cloudinary before deleting the question
-questionSchema.pre('deleteOne', { document: true, query: false }, async function(next) {
+questionSchema.pre('deleteOne', { document: true, query: false }, async function (next) {
   try {
     const cloudinary = require('cloudinary').v2;
     const config = require('../config/config');
-    
+
     cloudinary.config({
       cloud_name: config.CLOUDINARY_CLOUD_NAME,
       api_key: config.CLOUDINARY_API_KEY,
@@ -160,9 +160,13 @@ questionSchema.pre('deleteOne', { document: true, query: false }, async function
 
     if (mediaToDelete.length > 0) {
       await Promise.all(
-        mediaToDelete.map(publicId =>
-          cloudinary.uploader.destroy(publicId, { resource_type: 'auto' })
-        )
+        mediaToDelete.map(publicId => {
+          let resourceType ='auto';
+          if (publicId.includes('youtube') || publicId.includes('youtu.be')) {
+            resourceType = 'video';
+          }
+          return cloudinary.uploader.destroy(publicId, { resource_type: resourceType })
+        })
       );
     }
     next();

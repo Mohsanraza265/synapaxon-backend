@@ -116,7 +116,12 @@ exports.deleteMedia = async (req, res, next) => {
     const publicId = `synapaxon_uploads/${filename}`;
 
     // Delete file from Cloudinary
-    await cloudinary.uploader.destroy(publicId, { resource_type: 'auto' });
+    let resourceType = 'auto';
+    if (filename.includes('youtube') || filename.includes('youtu.be')) {
+      resourceType = 'video';
+    }
+
+    await cloudinary.uploader.destroy(publicId, { resource_type: resourceType });
 
     res.status(200).json({
       success: true,
