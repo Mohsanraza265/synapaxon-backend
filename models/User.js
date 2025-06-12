@@ -46,6 +46,14 @@ const UserSchema = new mongoose.Schema({
     enum: ['free', 'pro', 'premium'],
     default: 'free'
   },
+  aiUsageCount: {
+    type: Number,
+    default: 0
+  },
+  aiUsageLimit: {
+    type: Number,
+    default: 5 // Puedes ajustar según el plan
+  },
   createdAt: {
     type: Date,
     default: Date.now
@@ -63,6 +71,28 @@ UserSchema.pre('save', async function (next) {
   next();
 });
 
+// Plan user
+UserSchema.statics.getLimitsByPlan = function(plan) {
+  const limits = {
+    free: {
+      aiUsageLimit: 5,
+      uploadLimit: 5,
+      agentLimit: 5
+    },
+    pro: {
+      aiUsageLimit: 50,
+      uploadLimit: 50,
+      agentLimit: 20
+    },
+    premium: {
+      aiUsageLimit: 100,
+      uploadLimit: 100,
+      agentLimit: 50
+    }
+  };
+  
+  return limits[plan] || limits.free;
+};
 // Sign JWT and return
 UserSchema.methods.getSignedJwtToken = function () {
   return jwt.sign(

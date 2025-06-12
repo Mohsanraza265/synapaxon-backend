@@ -7,6 +7,7 @@ const passport = require('./config/passport');
 const config = require('./config/config');
 const connectDB = require('./config/db');
 const errorHandler = require('./utils/errorHandler');
+const resetLimitIa = require('./utils/resetAiUsage');
 
 // Import routes
 const authRoutes = require('./routes/auth');
