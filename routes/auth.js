@@ -1,11 +1,13 @@
 const express = require('express');
 const router = express.Router();
+const multer = require('multer');
+const upload = multer();
 const { register, login, getMe, googleAuth, googleAuthCallback, getAllUsers, updateUser, deleteUser, getUsersCount , getUsersByPlans} = require('../controllers/authController');
 const { protect, ensureAdmin } = require('../middleware/authMiddleware');
 
 // Register and login routes
-router.post('/register', register);
-router.post('/login', login);
+router.post('/register', upload.none(), register);
+router.post('/login', upload.none(), login);
 
 // Google authentication routes
 router.get('/google', googleAuth);
